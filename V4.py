@@ -399,7 +399,7 @@ DATA_PATH = "ip_pricing_synthetic_10000_clean.csv"
 
 MATTER_CATEGORIES = ["Litigation", "Corporate/M&A", "Intellectual Property", "Employment", "Real Estate", "Regulatory", "Tax", "Other"]
 TECH_DOMAINS = ["AI/ML", "Biotech", "Semiconductors", "Pharma", "MedTech", "Software", "Hardware", "Other"]
-CLIENT_TYPES = ["New Client", "Existing - Strategic", "Existing - Non-Strategic"]
+CLIENT_TYPES = ["Existing - Strategic", "Existing - Non-Strategic","New Client"]
 CLIENT_INDUSTRIES = ["Technology", "Life Sciences", "Manufacturing", "Financial Services", "Energy", "Healthcare", "Other"]
 
 IP_TYPES = {
@@ -416,7 +416,7 @@ FEE_STRUCTURES = {
     "IP - PTAB": ["Phase-Based", "Fixed Fee", "Caps+Collars", "Blended"],
     "IP - Litigation": ["Blended", "Phase Caps", "Collar", "Contingency", "Success Bonus"],
     "IP - FTO": ["Fixed Fee", "Tiered", "Subscription", "Risk-Based"],
-    "default": ["Hourly", "Fixed Fee", "Phase-Based", "Capped", "Blended", "Retainer"]
+    "default": ["Fixed Fee (Based on the number of hours)", "Fixed Fee", "Phase-Based", "Capped", "Blended", "Retainer"]
 }
 
 IP_PHASES = {
@@ -1056,7 +1056,7 @@ def render_workbench():
                 industry = st.selectbox("Industry", CLIENT_INDUSTRIES, key="p1_ind")
         
         with st.expander("Domain Configuration", expanded=True):
-            enable_ip = st.toggle("Enable IP Module", value=True, key="p1_ip_toggle")
+            enable_ip = st.toggle("Enable IP Module", value=False, key="p1_ip_toggle")
             
             # FIXED: Initialize variables before conditional blocks
             practice_area = "Other"
@@ -1091,12 +1091,12 @@ def render_workbench():
                     complexity_kwargs['patent_count'] = st.slider("Patents in Scope", 1, 500, 50, key="p1_pat")
                     complexity_kwargs['scope'] = st.select_slider("Scope", ["Narrow", "Moderate", "Broad"], "Moderate", key="p1_scope")
         
-        with st.expander("Complexity Drivers", expanded=True):
+        with st.expander("Complexity Drivers Based on SOP", expanded=True):
             if not enable_ip:
                 complexity_kwargs['general_complexity'] = st.slider("Overall Complexity", 1, 10, 5, key="p1_gen")
                 complexity_kwargs['duration'] = st.number_input("Duration (days)", 7, 1000, 90, step=1, key="p1_dur")
             urgency = st.slider("Urgency Level", 1, 10, 5, key="p1_urg")
-            jurisdictions = st.number_input("Jurisdictions", 1, 50, 1, step=1, key="p1_jur")
+            jurisdictions = st.number_input("Jurisdictions count", 1, 50, 1, step=1, key="p1_jur")
             novel_issue = st.toggle("Novel Legal Issue", False, key="p1_novel")
         
         complexity_score, duration = compute_complexity(practice_area, **complexity_kwargs)
@@ -1155,7 +1155,7 @@ def render_workbench():
                 {"name": "Partner", "def_h": 12, "def_i": 300, "def_c": 950},
                 {"name": "Sr. Associate", "def_h": 18, "def_i": 220, "def_c": 650},
                 {"name": "Associate", "def_h": 30, "def_i": 150, "def_c": 400},
-                {"name": "Paralegal", "def_h": 10, "def_i": 80, "def_c": 175}
+                {"name": "Paralegal", "def_h": 40, "def_i": 80, "def_c": 175}
             ]
             
             role_data = []
@@ -1224,7 +1224,7 @@ def render_workbench():
             with c2a:
                 prev_matters = st.slider("Previous Matters", 0, 100, 12, key="p2_prev")
                 satisfaction = st.slider("Client Satisfaction", 1, 10, 8, key="p2_sat")
-                team_size = st.slider("Team Size", 1, 20, 5, key="p2_team")
+                team_size = st.slider("In-house counsel", 1, 20, 5, key="p2_team")
             
             comp_pos = st.select_slider("Competitive Position",
                 ["Very Weak", "Weak", "Neutral", "Strong", "Very Strong"], "Strong", key="p2_comp")
